@@ -42,6 +42,8 @@ export interface Design {
   version: number;
   notes: string;
   threads: DesignThread[];
+  isDeleted?: boolean;
+  deletedAt?: string;
   createdAt: string;
 }
 

@@ -126,6 +126,7 @@ export const store = {
 
   // Designs
   getDesigns: (): Design[] => getItem(STORAGE_KEYS.designs, SEED_DESIGNS),
+  getActiveDesigns: (): Design[] => store.getDesigns().filter(d => !d.isDeleted),
   saveDesigns: (designs: Design[]) => setItem(STORAGE_KEYS.designs, designs),
   addDesign: (design: Omit<Design, 'id' | 'createdAt'>): Design => {
     const designs = store.getDesigns();
@@ -138,9 +139,16 @@ export const store = {
     const designs = store.getDesigns().map(d => d.id === id ? { ...d, ...updates } : d);
     store.saveDesigns(designs);
   },
+  softDeleteDesign: (id: string) => {
+    store.updateDesign(id, { isDeleted: true, deletedAt: new Date().toISOString() });
+  },
+  restoreDesign: (id: string) => {
+    store.updateDesign(id, { isDeleted: false, deletedAt: undefined });
+  },
 
   // Helpers
   getThreadById: (id: string): Thread | undefined => store.getThreads().find(t => t.id === id),
+  getInStockThreads: (): Thread[] => store.getThreads().filter(t => t.qtyOnHand > 0),
   getLowStockThreads: (): Thread[] => store.getThreads().filter(t => t.qtyOnHand <= t.lowStockThreshold),
   getThreadsOnMachines: (): Set<string> => {
     const onMachine = new Set<string>();
