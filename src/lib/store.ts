@@ -1,5 +1,14 @@
 import { Thread, Machine, Design } from './types';
 
+// Helper to ensure backward compat for threads missing new fields
+function migrateThread(t: Thread): Thread {
+  return {
+    ...t,
+    lowStockMode: t.lowStockMode ?? 'manual',
+    manualLowStockThreshold: t.manualLowStockThreshold ?? t.lowStockThreshold ?? 3,
+  };
+}
+
 const STORAGE_KEYS = {
   threads: 'embroidery_threads',
   machines: 'embroidery_machines',
@@ -12,18 +21,18 @@ function generateId(): string {
 
 // Seed data
 const SEED_THREADS: Thread[] = [
-  { id: generateId(), sku: 'ISA-0015', manufacturer: 'Isacord', colorName: 'White', hex: '#FFFFFF', type: 'polyester', unit: 'spool', qtyOnHand: 24, lowStockThreshold: 5, location: 'Shelf A1', tags: ['basic'], createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() },
-  { id: generateId(), sku: 'ISA-0020', manufacturer: 'Isacord', colorName: 'Black', hex: '#000000', type: 'polyester', unit: 'spool', qtyOnHand: 18, lowStockThreshold: 5, location: 'Shelf A1', tags: ['basic'], createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() },
-  { id: generateId(), sku: 'ISA-2922', manufacturer: 'Isacord', colorName: 'Ashley Gold', hex: '#D4A843', type: 'polyester', unit: 'spool', qtyOnHand: 6, lowStockThreshold: 3, location: 'Shelf A2', tags: ['metallic'], createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() },
-  { id: generateId(), sku: 'MAD-1147', manufacturer: 'Madeira', colorName: 'Dusty Rose', hex: '#C9777A', type: 'rayon', unit: 'cone', qtyOnHand: 3, lowStockThreshold: 3, location: 'Shelf B1', tags: ['rayon', 'pink'], createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() },
-  { id: generateId(), sku: 'MAD-1055', manufacturer: 'Madeira', colorName: 'Pacific Blue', hex: '#1B75BB', type: 'rayon', unit: 'cone', qtyOnHand: 8, lowStockThreshold: 3, location: 'Shelf B1', tags: ['rayon', 'blue'], createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() },
-  { id: generateId(), sku: 'SUL-1001', manufacturer: 'Sulky', colorName: 'Bright White', hex: '#F8F8F8', type: 'rayon', unit: 'spool', qtyOnHand: 12, lowStockThreshold: 4, location: 'Shelf C1', tags: ['basic', 'rayon'], createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() },
-  { id: generateId(), sku: 'ISA-3711', manufacturer: 'Isacord', colorName: 'Paprika', hex: '#B13A2A', type: 'polyester', unit: 'spool', qtyOnHand: 2, lowStockThreshold: 3, location: 'Shelf A3', tags: ['red'], createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() },
-  { id: generateId(), sku: 'ISA-5513', manufacturer: 'Isacord', colorName: 'Emerald', hex: '#2E8B57', type: 'polyester', unit: 'spool', qtyOnHand: 7, lowStockThreshold: 3, location: 'Shelf A3', tags: ['green'], createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() },
-  { id: generateId(), sku: 'MAD-1112', manufacturer: 'Madeira', colorName: 'Cornflower', hex: '#6495ED', type: 'rayon', unit: 'cone', qtyOnHand: 5, lowStockThreshold: 2, location: 'Shelf B2', tags: ['blue', 'rayon'], createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() },
-  { id: generateId(), sku: 'ISA-0776', manufacturer: 'Isacord', colorName: 'Sage', hex: '#9CAF88', type: 'polyester', unit: 'spool', qtyOnHand: 1, lowStockThreshold: 3, location: 'Shelf A4', tags: ['green', 'muted'], createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() },
-  { id: generateId(), sku: 'SUL-1181', manufacturer: 'Sulky', colorName: 'Rust', hex: '#A0522D', type: 'rayon', unit: 'spool', qtyOnHand: 4, lowStockThreshold: 2, location: 'Shelf C2', tags: ['brown', 'rayon'], createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() },
-  { id: generateId(), sku: 'ISA-1874', manufacturer: 'Isacord', colorName: 'Champagne', hex: '#F7E7CE', type: 'polyester', unit: 'spool', qtyOnHand: 9, lowStockThreshold: 3, location: 'Shelf A2', tags: ['neutral', 'light'], createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() },
+  { id: generateId(), sku: 'ISA-0015', manufacturer: 'Isacord', colorName: 'White', hex: '#FFFFFF', type: 'polyester', unit: 'spool', qtyOnHand: 24, lowStockThreshold: 5, lowStockMode: 'auto', manualLowStockThreshold: 5, location: 'Shelf A1', tags: ['basic'], createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() },
+  { id: generateId(), sku: 'ISA-0020', manufacturer: 'Isacord', colorName: 'Black', hex: '#000000', type: 'polyester', unit: 'spool', qtyOnHand: 18, lowStockThreshold: 5, lowStockMode: 'auto', manualLowStockThreshold: 5, location: 'Shelf A1', tags: ['basic'], createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() },
+  { id: generateId(), sku: 'ISA-2922', manufacturer: 'Isacord', colorName: 'Ashley Gold', hex: '#D4A843', type: 'polyester', unit: 'spool', qtyOnHand: 6, lowStockThreshold: 3, lowStockMode: 'auto', manualLowStockThreshold: 3, location: 'Shelf A2', tags: ['metallic'], createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() },
+  { id: generateId(), sku: 'MAD-1147', manufacturer: 'Madeira', colorName: 'Dusty Rose', hex: '#C9777A', type: 'rayon', unit: 'cone', qtyOnHand: 3, lowStockThreshold: 3, lowStockMode: 'manual', manualLowStockThreshold: 3, location: 'Shelf B1', tags: ['rayon', 'pink'], createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() },
+  { id: generateId(), sku: 'MAD-1055', manufacturer: 'Madeira', colorName: 'Pacific Blue', hex: '#1B75BB', type: 'rayon', unit: 'cone', qtyOnHand: 8, lowStockThreshold: 3, lowStockMode: 'auto', manualLowStockThreshold: 3, location: 'Shelf B1', tags: ['rayon', 'blue'], createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() },
+  { id: generateId(), sku: 'SUL-1001', manufacturer: 'Sulky', colorName: 'Bright White', hex: '#F8F8F8', type: 'rayon', unit: 'spool', qtyOnHand: 12, lowStockThreshold: 4, lowStockMode: 'auto', manualLowStockThreshold: 4, location: 'Shelf C1', tags: ['basic', 'rayon'], createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() },
+  { id: generateId(), sku: 'ISA-3711', manufacturer: 'Isacord', colorName: 'Paprika', hex: '#B13A2A', type: 'polyester', unit: 'spool', qtyOnHand: 2, lowStockThreshold: 3, lowStockMode: 'manual', manualLowStockThreshold: 3, location: 'Shelf A3', tags: ['red'], createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() },
+  { id: generateId(), sku: 'ISA-5513', manufacturer: 'Isacord', colorName: 'Emerald', hex: '#2E8B57', type: 'polyester', unit: 'spool', qtyOnHand: 7, lowStockThreshold: 3, lowStockMode: 'auto', manualLowStockThreshold: 3, location: 'Shelf A3', tags: ['green'], createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() },
+  { id: generateId(), sku: 'MAD-1112', manufacturer: 'Madeira', colorName: 'Cornflower', hex: '#6495ED', type: 'rayon', unit: 'cone', qtyOnHand: 5, lowStockThreshold: 2, lowStockMode: 'auto', manualLowStockThreshold: 2, location: 'Shelf B2', tags: ['blue', 'rayon'], createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() },
+  { id: generateId(), sku: 'ISA-0776', manufacturer: 'Isacord', colorName: 'Sage', hex: '#9CAF88', type: 'polyester', unit: 'spool', qtyOnHand: 1, lowStockThreshold: 3, lowStockMode: 'manual', manualLowStockThreshold: 3, location: 'Shelf A4', tags: ['green', 'muted'], createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() },
+  { id: generateId(), sku: 'SUL-1181', manufacturer: 'Sulky', colorName: 'Rust', hex: '#A0522D', type: 'rayon', unit: 'spool', qtyOnHand: 4, lowStockThreshold: 2, lowStockMode: 'auto', manualLowStockThreshold: 2, location: 'Shelf C2', tags: ['brown', 'rayon'], createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() },
+  { id: generateId(), sku: 'ISA-1874', manufacturer: 'Isacord', colorName: 'Champagne', hex: '#F7E7CE', type: 'polyester', unit: 'spool', qtyOnHand: 9, lowStockThreshold: 3, lowStockMode: 'auto', manualLowStockThreshold: 3, location: 'Shelf A2', tags: ['neutral', 'light'], createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() },
 ];
 
 const SEED_MACHINES: Machine[] = [
@@ -77,7 +86,8 @@ function setItem<T>(key: string, data: T[]) {
 // Public API
 export const store = {
   // Threads
-  getThreads: (): Thread[] => getItem(STORAGE_KEYS.threads, SEED_THREADS),
+  getThreads: (): Thread[] => getItem(STORAGE_KEYS.threads, SEED_THREADS).map(migrateThread),
+  getMachineCount: (): number => store.getMachines().length,
   saveThreads: (threads: Thread[]) => setItem(STORAGE_KEYS.threads, threads),
   addThread: (thread: Omit<Thread, 'id' | 'createdAt' | 'updatedAt'>): Thread => {
     const threads = store.getThreads();
@@ -149,7 +159,13 @@ export const store = {
   // Helpers
   getThreadById: (id: string): Thread | undefined => store.getThreads().find(t => t.id === id),
   getInStockThreads: (): Thread[] => store.getThreads().filter(t => t.qtyOnHand > 0),
-  getLowStockThreads: (): Thread[] => store.getThreads().filter(t => t.qtyOnHand <= t.lowStockThreshold),
+  isThreadLowStock: (t: Thread): boolean => {
+    if (t.lowStockMode === 'auto') {
+      return t.qtyOnHand === store.getMachineCount();
+    }
+    return t.qtyOnHand <= (t.manualLowStockThreshold ?? t.lowStockThreshold);
+  },
+  getLowStockThreads: (): Thread[] => store.getThreads().filter(t => store.isThreadLowStock(t)),
   getThreadsOnMachines: (): Set<string> => {
     const onMachine = new Set<string>();
     store.getMachines().forEach(m => m.slots.forEach(s => { if (s.threadId) onMachine.add(s.threadId); }));

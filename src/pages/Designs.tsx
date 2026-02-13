@@ -27,7 +27,7 @@ function ThreadPicker({ value, onChange }: { value: string; onChange: (hex: stri
 
   const filtered = inStock.filter(t => {
     const q = search.toLowerCase();
-    return !q || t.colorName.toLowerCase().includes(q) || t.sku.toLowerCase().includes(q);
+    return !q || t.colorName.toLowerCase().includes(q) || t.sku.toLowerCase().includes(q) || t.manufacturer.toLowerCase().includes(q) || t.hex.toLowerCase().includes(q);
   });
 
   return (
@@ -44,7 +44,7 @@ function ThreadPicker({ value, onChange }: { value: string; onChange: (hex: stri
           <Input
             value={search}
             onChange={e => setSearch(e.target.value)}
-            placeholder="Search in-stock..."
+            placeholder="Search by SKU, manufacturer, color..."
             className="text-xs h-8 mb-1"
             autoFocus
           />
@@ -56,8 +56,9 @@ function ThreadPicker({ value, onChange }: { value: string; onChange: (hex: stri
               className="w-full flex items-center gap-2 px-2 py-1.5 rounded hover:bg-muted transition-colors text-left"
             >
               <div className="w-5 h-5 rounded-full border border-border shrink-0" style={{ backgroundColor: t.hex }} />
-              <span className="text-xs font-medium truncate">{t.colorName}</span>
-              <span className="text-[10px] text-muted-foreground">{t.sku}</span>
+              <span className="text-[10px] font-mono font-semibold text-foreground">{t.sku}</span>
+              <span className="text-[10px] text-muted-foreground truncate">{t.manufacturer}</span>
+              <span className="text-[10px] text-muted-foreground truncate">— {t.colorName}</span>
             </button>
           ))}
           {filtered.length === 0 && <p className="text-xs text-muted-foreground text-center py-3">No in-stock threads</p>}
@@ -243,8 +244,9 @@ export default function Designs() {
                         <div key={i} className="flex items-center gap-3 text-sm">
                           <span className="font-mono text-xs text-muted-foreground w-6">{dt.order}</span>
                           <div className="thread-chip shrink-0" style={{ backgroundColor: dt.colorHex }} />
-                          <span className="font-medium">{thread ? thread.colorName : dt.colorHex}</span>
-                          {thread && <span className="text-xs text-muted-foreground">{thread.sku}</span>}
+                          <span className="font-mono text-xs font-semibold">{thread ? thread.sku : '—'}</span>
+                          {thread && <span className="text-xs text-muted-foreground">{thread.manufacturer} — {thread.colorName}</span>}
+                          {!thread && <span className="text-xs text-muted-foreground italic">Unlinked</span>}
                           <Badge variant="secondary" className="text-[10px]">{dt.stitchCode}</Badge>
                           {dt.note && <span className="text-xs text-muted-foreground italic">{dt.note}</span>}
                         </div>
