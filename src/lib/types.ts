@@ -1,3 +1,16 @@
+export type LowStockMode = 'auto' | 'manual';
+
+export const KNOWN_MANUFACTURERS = [
+  'Madeira',
+  'Isacord (Amann Group)',
+  'Robison-Anton',
+  'Sulky',
+  'Coats',
+  'Mettler (Gutermann)',
+  'Aurifil',
+  'Floriani',
+] as const;
+
 export interface Thread {
   id: string;
   sku: string;
@@ -9,6 +22,8 @@ export interface Thread {
   unit: 'spool' | 'cone' | 'meters' | 'yards';
   qtyOnHand: number;
   lowStockThreshold: number;
+  lowStockMode: LowStockMode;
+  manualLowStockThreshold: number | null;
   location: string;
   tags: string[];
   photoUrl?: string;

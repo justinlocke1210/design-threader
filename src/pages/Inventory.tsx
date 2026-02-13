@@ -67,7 +67,7 @@ export default function Inventory() {
       <div className="page-header flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
         <div>
           <h1 className="page-title">Thread Inventory</h1>
-          <p className="page-subtitle">{threads.length} SKUs · {threads.reduce((s, t) => s + t.qtyOnHand, 0)} total units</p>
+          <p className="page-subtitle">{threads.length} SKUs · {threads.reduce((s, t) => s + t.qtyOnHand, 0)} total units · {store.getMachineCount()} machines</p>
         </div>
         <Button onClick={() => { setEditThread(null); setDialogOpen(true); }} className="gap-2">
           <Plus size={16} /> Add Thread
@@ -108,8 +108,9 @@ export default function Inventory() {
             </thead>
             <tbody>
               {filtered.map(t => {
-                const isLow = t.qtyOnHand <= t.lowStockThreshold;
+                const isLow = store.isThreadLowStock(t);
                 const isOnMachine = onMachine.has(t.id);
+                const machineCount = store.getMachineCount();
                 return (
                   <tr key={t.id} className="border-b last:border-0 hover:bg-muted/30 transition-colors">
                     <td className="px-4 py-3">
@@ -127,9 +128,16 @@ export default function Inventory() {
                     </td>
                     <td className="px-4 py-3 hidden lg:table-cell text-muted-foreground">{t.location}</td>
                     <td className="px-4 py-3 hidden md:table-cell">
-                      <div className="flex gap-1.5">
-                        {isOnMachine && <Badge variant="secondary" className="text-[10px]">On Machine</Badge>}
-                        {isLow && <Badge variant="destructive" className="text-[10px]">Low Stock</Badge>}
+                      <div className="flex flex-col gap-1">
+                        <div className="flex gap-1.5">
+                          {isOnMachine && <Badge variant="secondary" className="text-[10px]">On Machine</Badge>}
+                          {isLow && <Badge variant="destructive" className="text-[10px]">Low Stock</Badge>}
+                        </div>
+                        <span className="text-[10px] text-muted-foreground">
+                          {t.lowStockMode === 'auto'
+                            ? `Auto (machines: ${machineCount})`
+                            : `Manual (≤ ${t.manualLowStockThreshold ?? t.lowStockThreshold})`}
+                        </span>
                       </div>
                     </td>
                     <td className="px-4 py-3 text-right">
