@@ -123,6 +123,24 @@ export const store = {
     const machines = store.getMachines().map(m => m.id === id ? { ...m, ...updates } : m);
     store.saveMachines(machines);
   },
+  deleteMachine: (id: string) => {
+    store.saveMachines(store.getMachines().filter(m => m.id !== id));
+  },
+  duplicateMachine: (id: string): Machine | undefined => {
+    const machines = store.getMachines();
+    const source = machines.find(m => m.id === id);
+    if (!source) return undefined;
+    const clone: Machine = {
+      ...source,
+      id: generateId(),
+      name: `${source.name} (Copy)`,
+      slots: Array.from({ length: source.maxSlots }, (_, i) => ({ slotNumber: i + 1, threadId: null, assignedAt: null })),
+      createdAt: new Date().toISOString(),
+    };
+    machines.push(clone);
+    store.saveMachines(machines);
+    return clone;
+  },
   assignSlot: (machineId: string, slotNumber: number, threadId: string | null) => {
     const machines = store.getMachines().map(m => {
       if (m.id !== machineId) return m;
