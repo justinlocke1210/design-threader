@@ -1,6 +1,8 @@
 import { store } from '@/lib/store';
-import { Package, Cpu, AlertTriangle, FileText } from 'lucide-react';
+import { Package, Cpu, AlertTriangle, FileText, Download } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { Button } from '@/components/ui/button';
+import { toast } from '@/components/ui/sonner';
 
 export default function Dashboard() {
   const threads = store.getThreads();
@@ -19,6 +21,27 @@ export default function Dashboard() {
     { label: 'Low Stock', value: lowStock.length, sub: 'Need reorder', icon: AlertTriangle, color: lowStock.length > 0 ? 'bg-warning' : 'bg-success' },
     { label: 'Designs', value: designs.length, sub: 'Thread palettes', icon: FileText, color: 'bg-secondary' },
   ];
+
+  const exportLowStockCsv = () => {
+    if (lowStock.length === 0) {
+      toast('No low stock threads to export');
+      return;
+    }
+    const headers = ['SKU', 'Color Name', 'Manufacturer', 'Type', 'Qty On Hand', 'Threshold', 'Unit'];
+    const rows = lowStock.map(t => {
+      const threshold = t.lowStockMode === 'auto' ? machines.length : (t.manualLowStockThreshold ?? t.lowStockThreshold);
+      return [t.sku, t.colorName, t.manufacturer, t.type, t.qtyOnHand, threshold, t.unit].join(',');
+    });
+    const csv = [headers.join(','), ...rows].join('\n');
+    const blob = new Blob([csv], { type: 'text/csv' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `low-stock-reorder-${new Date().toISOString().slice(0, 10)}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+    toast(`Exported ${lowStock.length} low-stock SKUs`);
+  };
 
   return (
     <div className="animate-fade-in">
@@ -45,9 +68,14 @@ export default function Dashboard() {
       {/* Low stock alerts */}
       {lowStock.length > 0 && (
         <div className="mb-8">
-          <h2 className="font-display font-semibold text-lg mb-3 flex items-center gap-2">
-            <AlertTriangle size={18} className="text-warning" /> Low Stock Alerts
-          </h2>
+          <div className="flex items-center justify-between mb-3">
+            <h2 className="font-display font-semibold text-lg flex items-center gap-2">
+              <AlertTriangle size={18} className="text-warning" /> Low Stock Alerts
+            </h2>
+            <Button variant="outline" size="sm" className="gap-2" onClick={exportLowStockCsv}>
+              <Download size={14} /> Export Reorder CSV
+            </Button>
+          </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
             {lowStock.map(t => (
               <div key={t.id} className="stat-card flex items-center gap-3">

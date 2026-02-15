@@ -179,7 +179,7 @@ export const store = {
   getInStockThreads: (): Thread[] => store.getThreads().filter(t => t.qtyOnHand > 0),
   isThreadLowStock: (t: Thread): boolean => {
     if (t.lowStockMode === 'auto') {
-      return t.qtyOnHand === store.getMachineCount();
+      return t.qtyOnHand <= store.getMachineCount();
     }
     return t.qtyOnHand <= (t.manualLowStockThreshold ?? t.lowStockThreshold);
   },
