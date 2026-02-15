@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Thread, KNOWN_MANUFACTURERS } from '@/lib/types';
 import { store } from '@/lib/store';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
@@ -20,21 +20,17 @@ const DEFAULTS: Omit<Thread, 'id' | 'createdAt' | 'updatedAt'> = {
 };
 
 export default function ThreadFormDialog({ open, onOpenChange, thread, onSave }: Props) {
-  const initial = thread ? { ...thread } : { ...DEFAULTS };
-  const [form, setForm] = useState(initial);
+  const [form, setForm] = useState(thread ? { ...thread } : { ...DEFAULTS });
   const [customMfg, setCustomMfg] = useState(false);
 
-  const machineCount = store.getMachineCount();
-
-  const handleOpenChange = (o: boolean) => {
-    if (o) {
+  useEffect(() => {
+    if (open) {
       const data = thread ? { ...thread } : { ...DEFAULTS };
       setForm(data);
       const isKnown = KNOWN_MANUFACTURERS.includes(data.manufacturer as any);
       setCustomMfg(!!data.manufacturer && !isKnown);
     }
-    onOpenChange(o);
-  };
+  }, [open, thread]);
 
   const set = (key: string, value: any) => setForm(prev => ({ ...prev, [key]: value }));
 
@@ -55,7 +51,7 @@ export default function ThreadFormDialog({ open, onOpenChange, thread, onSave }:
   };
 
   return (
-    <Dialog open={open} onOpenChange={handleOpenChange}>
+    <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-lg max-h-[85vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="font-display">{thread ? 'Edit Thread' : 'Add Thread'}</DialogTitle>
@@ -151,7 +147,7 @@ export default function ThreadFormDialog({ open, onOpenChange, thread, onSave }:
             </div>
             {form.lowStockMode === 'auto' ? (
               <p className="text-xs text-muted-foreground">
-                Alert when qty equals machine count (currently <span className="font-semibold">{machineCount}</span>)
+                Alert when qty equals machine count (currently <span className="font-semibold">{store.getMachineCount()}</span>)
               </p>
             ) : (
               <div className="flex items-center gap-2">
