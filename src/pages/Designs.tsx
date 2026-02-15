@@ -10,6 +10,7 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Switch } from '@/components/ui/switch';
 import { toast } from 'sonner';
+import DesignImageUpload from '@/components/DesignImageUpload';
 
 function ThreadPicker({ value, onChange }: { value: string; onChange: (hex: string, threadId: string | null) => void }) {
   const inStock = store.getInStockThreads();
@@ -252,6 +253,9 @@ export default function Designs() {
                         </div>
                       );
                     })}
+                  </div>
+                  <div className="mb-4">
+                    <DesignImageUpload designId={d.id} />
                   </div>
                   <div className="flex gap-2">
                     {!isDeleted && (
