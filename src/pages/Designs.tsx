@@ -224,7 +224,8 @@ export default function Designs() {
                   </h3>
                   <p className="text-xs text-muted-foreground">{d.threads.length} colors · v{d.version}</p>
                 </div>
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-3">
+                  <DesignImageUpload designId={d.id} previewOnly />
                   <div className="flex -space-x-1">
                     {d.threads.slice(0, 6).map((dt, i) => (
                       <div key={i} className="w-5 h-5 rounded-full border-2 border-card" style={{ backgroundColor: dt.colorHex }} />
