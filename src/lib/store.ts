@@ -189,6 +189,10 @@ export const store = {
   restoreDesign: (id: string) => {
     store.updateDesign(id, { isDeleted: false, deletedAt: undefined });
   },
+  permanentDeleteDesign: (id: string) => {
+    const designs = store.getDesigns().filter(d => d.id !== id);
+    store.saveDesigns(designs);
+  },
 
   // Helpers
   getThreadById: (id: string): Thread | undefined => store.getThreads().find(t => t.id === id),
