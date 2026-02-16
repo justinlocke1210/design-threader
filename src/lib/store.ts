@@ -151,6 +151,22 @@ export const store = {
     });
     store.saveMachines(machines);
   },
+  markSlotEmpty: (machineId: string, slotNumber: number) => {
+    const machines = store.getMachines();
+    const machine = machines.find(m => m.id === machineId);
+    if (!machine) return;
+    const slot = machine.slots.find(s => s.slotNumber === slotNumber);
+    if (!slot?.threadId) return;
+    const threadId = slot.threadId;
+    // Decrement thread qty (min 0)
+    const threads = store.getThreads();
+    const thread = threads.find(t => t.id === threadId);
+    if (thread) {
+      store.updateThread(threadId, { qtyOnHand: Math.max(0, thread.qtyOnHand - 1) });
+    }
+    // Unassign the slot
+    store.assignSlot(machineId, slotNumber, null);
+  },
 
   // Designs
   getDesigns: (): Design[] => getItem(STORAGE_KEYS.designs, SEED_DESIGNS),
