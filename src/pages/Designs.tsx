@@ -91,6 +91,7 @@ export default function Designs() {
   const refresh = useCallback(() => setDesigns(store.getDesigns()), []);
 
   const visibleDesigns = showDeleted ? designs : designs.filter(d => !d.isDeleted);
+  const deletedDesigns = designs.filter(d => d.isDeleted);
 
   const resetForm = () => {
     setFormName('');
@@ -157,6 +158,12 @@ export default function Designs() {
     toast('Design permanently deleted');
   };
 
+  const handlePermanentDeleteAll = () => {
+    deletedDesigns.forEach(d => store.permanentDeleteDesign(d.id));
+    refresh();
+    toast(`${deletedDesigns.length} design(s) permanently deleted`);
+  };
+
   const addThreadRow = () => {
     setFormThreads(prev => [...prev, { order: prev.length + 1, threadId: null, colorHex: '#000000', stitchCode: `C${prev.length + 1}`, note: '' }]);
   };
@@ -205,6 +212,25 @@ export default function Designs() {
             <Switch checked={showDeleted} onCheckedChange={setShowDeleted} id="show-deleted" />
             <label htmlFor="show-deleted" className="cursor-pointer">Show deleted</label>
           </div>
+          {showDeleted && deletedDesigns.length > 0 && (
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <Button variant="destructive" size="sm" className="gap-1.5">
+                  <Trash2 size={14} /> Delete All ({deletedDesigns.length})
+                </Button>
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>Permanently delete all {deletedDesigns.length} deleted designs?</AlertDialogTitle>
+                  <AlertDialogDescription>This action cannot be undone. All soft-deleted designs will be permanently removed.</AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel>Cancel</AlertDialogCancel>
+                  <AlertDialogAction onClick={handlePermanentDeleteAll} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">Delete All Forever</AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
+          )}
           <Button onClick={openAdd} className="gap-2">
             <Plus size={16} /> Add Design
           </Button>
