@@ -1,10 +1,11 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { store } from '@/lib/store';
 import { Design, DesignThread } from '@/lib/types';
-import { Plus, FileText, ChevronDown, ChevronUp, Pencil, Trash2, Undo2 } from 'lucide-react';
+import { Plus, FileText, ChevronDown, ChevronUp, Pencil, Trash2, Undo2, XCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
@@ -150,6 +151,12 @@ export default function Designs() {
     refresh();
   };
 
+  const handlePermanentDelete = (id: string) => {
+    store.permanentDeleteDesign(id);
+    refresh();
+    toast('Design permanently deleted');
+  };
+
   const addThreadRow = () => {
     setFormThreads(prev => [...prev, { order: prev.length + 1, threadId: null, colorHex: '#000000', stitchCode: `C${prev.length + 1}`, note: '' }]);
   };
@@ -271,9 +278,32 @@ export default function Designs() {
                       </>
                     )}
                     {isDeleted && (
-                      <Button size="sm" variant="outline" onClick={() => handleRestore(d.id)} className="gap-1.5">
-                        <Undo2 size={12} /> Restore
-                      </Button>
+                      <div className="flex gap-2">
+                        <Button size="sm" variant="outline" onClick={() => handleRestore(d.id)} className="gap-1.5">
+                          <Undo2 size={12} /> Restore
+                        </Button>
+                        <AlertDialog>
+                          <AlertDialogTrigger asChild>
+                            <Button size="sm" variant="destructive" className="gap-1.5">
+                              <XCircle size={12} /> Permanently Delete
+                            </Button>
+                          </AlertDialogTrigger>
+                          <AlertDialogContent>
+                            <AlertDialogHeader>
+                              <AlertDialogTitle>Permanently delete "{d.name}"?</AlertDialogTitle>
+                              <AlertDialogDescription>
+                                This action cannot be undone. The design and all its data will be permanently removed.
+                              </AlertDialogDescription>
+                            </AlertDialogHeader>
+                            <AlertDialogFooter>
+                              <AlertDialogCancel>Cancel</AlertDialogCancel>
+                              <AlertDialogAction onClick={() => handlePermanentDelete(d.id)} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+                                Delete Forever
+                              </AlertDialogAction>
+                            </AlertDialogFooter>
+                          </AlertDialogContent>
+                        </AlertDialog>
+                      </div>
                     )}
                   </div>
                 </div>
