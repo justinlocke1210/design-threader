@@ -2,7 +2,7 @@ import { useState, useMemo } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { store } from '@/lib/store';
 import { Thread } from '@/lib/types';
-import { ArrowLeft, X, Search, Pencil, Check } from 'lucide-react';
+import { ArrowLeft, X, Search, Pencil, Check, PackageMinus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -52,6 +52,11 @@ export default function MachineDetail() {
 
   const handleUnassign = (slotNumber: number) => {
     store.assignSlot(machine.id, slotNumber, null);
+    refresh();
+  };
+
+  const handleMarkEmpty = (slotNumber: number) => {
+    store.markSlotEmpty(machine.id, slotNumber);
     refresh();
   };
 
@@ -179,7 +184,12 @@ export default function MachineDetail() {
                   </td>
                   <td className="px-4 py-2.5 text-right">
                     {thread ? (
-                      <Button size="sm" variant="ghost" onClick={() => handleUnassign(slot.slotNumber)} className="text-xs">Remove</Button>
+                      <div className="flex items-center justify-end gap-1">
+                        <Button size="sm" variant="ghost" onClick={() => handleMarkEmpty(slot.slotNumber)} className="text-xs gap-1 text-destructive hover:text-destructive" title="Mark as empty — removes from slot and decrements inventory qty by 1">
+                          <PackageMinus size={13} /> Empty
+                        </Button>
+                        <Button size="sm" variant="ghost" onClick={() => handleUnassign(slot.slotNumber)} className="text-xs">Remove</Button>
+                      </div>
                     ) : (
                       <Button size="sm" variant="outline" onClick={() => setAssignSlot(slot.slotNumber)} className="text-xs">Assign</Button>
                     )}
