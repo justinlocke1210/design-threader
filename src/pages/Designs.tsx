@@ -1,7 +1,7 @@
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { store } from '@/lib/store';
 import { Design, DesignThread } from '@/lib/types';
-import { Plus, FileText, ChevronDown, ChevronUp, Pencil, Trash2, Undo2, XCircle } from 'lucide-react';
+import { Plus, FileText, ChevronDown, ChevronUp, Pencil, Trash2, Undo2, XCircle, ArrowUpDown, Search } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
@@ -10,6 +10,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Switch } from '@/components/ui/switch';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { toast } from 'sonner';
 import DesignImageUpload from '@/components/DesignImageUpload';
 
@@ -76,6 +77,9 @@ export default function Designs() {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [showDeleted, setShowDeleted] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [sortBy, setSortBy] = useState<'name' | 'colors' | 'date'>('date');
+  const [sortDir, setSortDir] = useState<'asc' | 'desc'>('desc');
 
   // Form state
   const [formName, setFormName] = useState('');
@@ -90,8 +94,23 @@ export default function Designs() {
 
   const refresh = useCallback(() => setDesigns(store.getDesigns()), []);
 
-  const visibleDesigns = showDeleted ? designs : designs.filter(d => !d.isDeleted);
   const deletedDesigns = designs.filter(d => d.isDeleted);
+
+  const visibleDesigns = useMemo(() => {
+    let list = showDeleted ? designs : designs.filter(d => !d.isDeleted);
+    if (searchQuery.trim()) {
+      const q = searchQuery.toLowerCase();
+      list = list.filter(d => d.name.toLowerCase().includes(q));
+    }
+    list = [...list].sort((a, b) => {
+      let cmp = 0;
+      if (sortBy === 'name') cmp = a.name.localeCompare(b.name);
+      else if (sortBy === 'colors') cmp = a.threads.length - b.threads.length;
+      else cmp = new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
+      return sortDir === 'asc' ? cmp : -cmp;
+    });
+    return list;
+  }, [designs, showDeleted, searchQuery, sortBy, sortDir]);
 
   const resetForm = () => {
     setFormName('');
@@ -205,9 +224,31 @@ export default function Designs() {
       <div className="page-header flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
         <div>
           <h1 className="page-title">Designs</h1>
-          <p className="page-subtitle">{visibleDesigns.length} design palettes</p>
+        <p className="page-subtitle">{visibleDesigns.length} design palettes</p>
         </div>
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-3 flex-wrap">
+          <div className="relative">
+            <Search size={14} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-muted-foreground" />
+            <Input
+              value={searchQuery}
+              onChange={e => setSearchQuery(e.target.value)}
+              placeholder="Search designs..."
+              className="pl-8 h-9 w-44 text-sm"
+            />
+          </div>
+          <Select value={sortBy} onValueChange={(v) => setSortBy(v as 'name' | 'colors' | 'date')}>
+            <SelectTrigger className="h-9 w-36 text-sm">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="date">Date</SelectItem>
+              <SelectItem value="name">Name</SelectItem>
+              <SelectItem value="colors">Colors</SelectItem>
+            </SelectContent>
+          </Select>
+          <Button variant="outline" size="sm" onClick={() => setSortDir(d => d === 'asc' ? 'desc' : 'asc')} className="gap-1.5 h-9">
+            <ArrowUpDown size={14} /> {sortDir === 'asc' ? 'Asc' : 'Desc'}
+          </Button>
           <div className="flex items-center gap-2 text-sm text-muted-foreground">
             <Switch checked={showDeleted} onCheckedChange={setShowDeleted} id="show-deleted" />
             <label htmlFor="show-deleted" className="cursor-pointer">Show deleted</label>
