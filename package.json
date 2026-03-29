@@ -88,3 +88,17 @@
     "vitest": "^3.2.4"
   }
 }
+"build": {
+  "appId": "com.designthreader.app",
+  "productName": "Design Threader",
+  "directories": {
+    "output": "release"
+  },
+  "files": [
+    "dist/**/*",
+    "electron/**/*"
+  ],
+  "win": {
+    "target": "nsis"
+  }
+}
