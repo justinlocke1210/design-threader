@@ -22,11 +22,11 @@ jobs:
       - name: Install dependencies
         run: npm install
 
-      - name: Build app
-        run: npm run build
+      - name: Build windows installer
+        run: npx electron-builder --win
 
-      - name: Upload web build artifact
+      - name: Upload installer
         uses: actions/upload-artifact@v4
         with:
-          name: design-threader-web-build
-          path: dist/**
+          name: design-threader-installer
+          path: release/**
