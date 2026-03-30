@@ -20,8 +20,8 @@ const App = () => (
       <Toaster />
       <Sonner />
       <HashRouter>
-        <div style={{ position: "absolute", top: 10, left: 10, zIndex: 9999 }}>
-          TEST BUILD WORKING
+        <div style={{ position: "absolute", top: 10, left: 10, zIndex: 9999, background: "yellow", color: "black", padding: "8px", fontWeight: "bold" }}>
+  TEST BUILD WORKING
         </div>
         
         <AppLayout>
