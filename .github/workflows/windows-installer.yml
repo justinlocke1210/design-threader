@@ -23,7 +23,7 @@ jobs:
         run: npm install
 
       - name: Build windows installer
-        run: npx electron-builder --win
+        run: npx electron-builder --win --publish never
 
       - name: Upload installer
         uses: actions/upload-artifact@v4
