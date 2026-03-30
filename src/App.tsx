@@ -20,6 +20,10 @@ const App = () => (
       <Toaster />
       <Sonner />
       <HashRouter>
+        <div style={{ position: "absolute", top: 10, left: 10, zIndex: 9999 }}>
+          TEST BUILD WORKING
+        </div>
+        
         <AppLayout>
           <Routes>
             <Route path="/" element={<Dashboard />} />
