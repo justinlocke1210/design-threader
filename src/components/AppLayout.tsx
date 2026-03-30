@@ -73,7 +73,7 @@ export default function AppLayout({ children }: { children: ReactNode }) {
           <button onClick={() => setMobileOpen(true)} className="text-foreground">
             <Menu size={20} />
           </button>
-          <span className="font-display font-bold text-sm">ThreadWorks</span>
+          <span className="font-display font-bold text-sm">Design Threader</span>
         </header>
 
         <div className="flex-1 overflow-y-auto p-4 md:p-8">
