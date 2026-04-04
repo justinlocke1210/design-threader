@@ -41,7 +41,7 @@ function createWindow() {
     height: 800,
     minWidth: 1000,
     minHeight: 700,
-    title: "Design Threader",
+    title: "ThreadWorks",
     webPreferences: {
       preload: path.join(__dirname, "preload.cjs"),
       contextIsolation: true,
