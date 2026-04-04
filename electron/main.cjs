@@ -3,6 +3,11 @@ const path = require("path");
 const fs = require("fs");
 const crypto = require("crypto");
 
+const APP_NAME = "Thread Works";
+
+app.setName(APP_NAME);
+app.setPath("userData", path.join(app.getPath("appData"), APP_NAME));
+
 function getDataDir() {
   const dir = path.join(app.getPath("userData"), "data");
   fs.mkdirSync(dir, { recursive: true });
@@ -41,7 +46,7 @@ function createWindow() {
     height: 800,
     minWidth: 1000,
     minHeight: 700,
-    title: "ThreadWorks",
+    title: APP_NAME,
     webPreferences: {
       preload: path.join(__dirname, "preload.cjs"),
       contextIsolation: true,
