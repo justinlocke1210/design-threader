@@ -6,7 +6,8 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import ThreadFormDialog from '@/components/ThreadFormDialog';
-import { parseThreadsFromExcel } from '@/lib/importThreads';
+import { readSpreadsheetFile, RawImportResult } from '@/lib/importThreadsPreview';
+import InventoryImportDialog from '@/components/InventoryImportDialog';
 import { toast } from 'sonner';
 import {
   AlertDialog,
@@ -29,6 +30,8 @@ export default function Inventory() {
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [importing, setImporting] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const [importPreviewOpen, setImportPreviewOpen] = useState(false);
+  const [importSource, setImportSource] = useState<RawImportResult | null>(null);
 
   const onMachine = store.getThreadsOnMachines();
 
@@ -86,23 +89,30 @@ export default function Inventory() {
   };
 
   const handleImportFile = async (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (!file) return;
+  const file = event.target.files?.[0];
+  if (!file) return;
 
-    setImporting(true);
-    try {
-      const rows = await parseThreadsFromExcel(file);
-      store.bulkUpsertThreads(rows);
-      refresh();
-      toast.success(`Imported ${rows.length} inventory row${rows.length === 1 ? '' : 's'}`);
-    } catch (error) {
-      const message = error instanceof Error ? error.message : 'Import failed';
-      toast.error(message);
-    } finally {
-      setImporting(false);
-      if (fileInputRef.current) fileInputRef.current.value = '';
-    }
-  };
+  setImporting(true);
+  try {
+    const source = await readSpreadsheetFile(file);
+    setImportSource(source);
+    setImportPreviewOpen(true);
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "Import failed";
+    toast.error(message);
+  } finally {
+    setImporting(false);
+    if (fileInputRef.current) fileInputRef.current.value = "";
+  }
+};
+
+  const handleConfirmImport = (rows: Omit<Thread, 'id' | 'createdAt' | 'updatedAt'>[]) => {
+  store.bulkUpsertThreads(rows);
+  refresh();
+  setImportPreviewOpen(false);
+  setImportSource(null);
+  toast.success(`Imported ${rows.length} inventory row${rows.length === 1 ? '' : 's'}`);
+};
 
   return (
     <div className="space-y-6">
@@ -272,6 +282,16 @@ export default function Inventory() {
         thread={editThread}
         onSave={handleSave}
       />
+
+      <InventoryImportDialog
+  open={importPreviewOpen}
+  onOpenChange={(open) => {
+    setImportPreviewOpen(open);
+    if (!open) setImportSource(null);
+  }}
+  source={importSource}
+  onConfirm={handleConfirmImport}
+/>
 
       <AlertDialog open={!!deleteId} onOpenChange={() => setDeleteId(null)}>
         <AlertDialogContent>
