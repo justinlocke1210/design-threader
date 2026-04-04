@@ -103,6 +103,39 @@ export const store = {
   deleteThread: (id: string) => {
     store.saveThreads(store.getThreads().filter(t => t.id !== id));
   },
+  bulkUpsertThreads: (rows: Omit<Thread, 'id' | 'createdAt' | 'updatedAt'>[]) => {
+  const threads = store.getThreads();
+  const now = new Date().toISOString();
+
+  const bySku = new Map(
+    threads.map((thread) => [thread.sku.trim().toLowerCase(), thread])
+  );
+
+  for (const row of rows) {
+    const key = row.sku.trim().toLowerCase();
+    const existing = bySku.get(key);
+
+    if (existing) {
+      Object.assign(existing, {
+        ...existing,
+        ...row,
+        updatedAt: now,
+      });
+    } else {
+      const newThread: Thread = {
+        ...row,
+        id: crypto.randomUUID(),
+        createdAt: now,
+        updatedAt: now,
+      };
+      threads.push(newThread);
+      bySku.set(key, newThread);
+    }
+  }
+
+  store.saveThreads(threads);
+  return threads;
+},
 
   // Machines
   getMachines: (): Machine[] => getItem(STORAGE_KEYS.machines, SEED_MACHINES),
