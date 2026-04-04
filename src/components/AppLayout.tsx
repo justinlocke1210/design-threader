@@ -32,7 +32,7 @@ export default function AppLayout({ children }: { children: ReactNode }) {
             <span className="text-sidebar-primary-foreground font-bold text-sm font-display">ES</span>
           </div>
           <div>
-            <h1 className="font-display font-bold text-sm tracking-tight text-sidebar-foreground">ThreadWorks</h1>
+            <h1 className="font-display font-bold text-sm tracking-tight text-sidebar-foreground">Thread Works</h1>
             <p className="text-[10px] text-sidebar-foreground/60 uppercase tracking-widest">Studio Manager</p>
           </div>
           <button className="ml-auto md:hidden text-sidebar-foreground/60" onClick={() => setMobileOpen(false)}>
