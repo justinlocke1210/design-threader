@@ -62,7 +62,10 @@ export default function AppLayout({ children }: { children: ReactNode }) {
         </nav>
 
         <div className="px-5 py-4 border-t border-sidebar-border">
-          <p className="text-[10px] text-sidebar-foreground/40 uppercase tracking-widest">v1.0 MVP</p>
+          <p className="text-[10px] text-sidebar-foreground/40 uppercase tracking-widest">
+            v{window.desktopAPI?.version || "0.0.0"}
+          </p>
+          
         </div>
       </aside>
 
