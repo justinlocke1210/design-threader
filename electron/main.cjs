@@ -59,6 +59,10 @@ function createWindow() {
 }
 
 app.whenReady().then(() => {
+  ipcMain.handle("app:getVersion", async () => {
+    return app.getVersion();
+  });
+
   ipcMain.handle("design-files:list", async (_, designId) => {
     const refs = listRefsForDesign(designId);
 
