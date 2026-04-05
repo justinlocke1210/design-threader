@@ -1,7 +1,6 @@
-import { ReactNode } from 'react';
+import { ReactNode, useEffect, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { LayoutDashboard, Palette, Cpu, FileText, Menu, X } from 'lucide-react';
-import { useState } from 'react';
 
 const navItems = [
   { to: '/', label: 'Dashboard', icon: LayoutDashboard },
@@ -11,6 +10,21 @@ const navItems = [
 ];
 
 export default function AppLayout({ children }: { children: ReactNode }) {
+  const [appVersion, setAppVersion] = useState("0.0.0");
+
+useEffect(() => {
+  let mounted = true;
+
+  window.desktopAPI?.getVersion()
+    .then((version) => {
+      if (mounted && version) setAppVersion(version);
+    })
+    .catch(() => {});
+
+  return () => {
+    mounted = false;
+  };
+}, []);
   const location = useLocation();
   const [mobileOpen, setMobileOpen] = useState(false);
 
@@ -62,8 +76,8 @@ export default function AppLayout({ children }: { children: ReactNode }) {
         </nav>
 
         <div className="px-5 py-4 border-t border-sidebar-border">
-          <p className="text-[10px] text-sidebar-foreground/40 uppercase tracking-widest">
-            v{window.desktopAPI?.version || "0.0.0"}
+          <p className="text-[10px] text-sidebar-foreground/40 uppercase tracking-widest"> 
+            v{appVersion} 
           </p>
           
         </div>
